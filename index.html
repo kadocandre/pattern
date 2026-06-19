@@ -415,6 +415,53 @@
     .preview-stage{padding-left:24px;}
   }
 
+  /* ---------- Mobile ---------- */
+  @media (max-width: 600px){
+    body{ font-size:15px; }
+    .sidebar{ padding:18px 16px 24px; }
+    .brand h1{ font-size:18px; }
+    .brand-sub{ margin:0 0 22px 24px; font-size:11.5px; }
+    .section{ margin-bottom:20px; padding-bottom:20px; }
+
+    /* Tappable controls need more room on touch screens */
+    input[type=range]{ height:6px; }
+    input[type=range]::-webkit-slider-thumb{ width:20px; height:20px; }
+    input[type=range]::-moz-range-thumb{ width:18px; height:18px; }
+    input[type=number], select, input[type=text]{ font-size:16px; padding:10px 10px; } /* 16px prevents iOS auto-zoom */
+    .seg button{ padding:10px 0; font-size:13px; }
+    .checkrow input[type=checkbox]{ width:18px; height:18px; }
+    .btn{ padding:12px 14px; font-size:14px; }
+    .btn-primary{ padding:15px 14px; font-size:15px; }
+    input[type=color]{ width:40px; height:40px; }
+    .chip, .chip img, .add-chip{ width:46px; height:46px; }
+
+    /* Main / preview area */
+    .main{ padding:18px 12px 32px; gap:14px; }
+    .main-top{ flex-wrap:wrap; gap:8px; }
+    .main-top h2{ font-size:13px; }
+    .preview-action-btn{ font-size:11.5px; padding:7px 10px; }
+
+    /* Rulers don't track a scaled-down canvas correctly, so hide them on
+       small screens and let the frame use the full available width. */
+    .ruler{ display:none; }
+    .preview-stage{ padding:0; width:100%; max-width:100%; }
+    .frame{ max-width:100%; }
+    .frame canvas{ max-width:100%; height:auto; }
+    .empty-state{ width:100%; max-width:420px; height:300px; }
+    .empty-state p{ max-width:200px; font-size:12.5px; }
+    .caption{ font-size:11px; padding:0 8px; }
+
+    /* Crop modal */
+    .crop-overlay{ padding:0; align-items:flex-end; }
+    .crop-modal{ max-width:100%; max-height:96vh; border-radius:14px 14px 0 0; }
+    .crop-head{ padding:14px 16px 12px; }
+    .crop-head h3{ font-size:14px; }
+    .crop-stage{ flex:0 0 auto; height:min(380px, 42vh); }
+    .crop-controls{ padding:12px 16px; gap:10px; }
+    .crop-row label{ width:54px; font-size:11.5px; }
+    .crop-actions{ padding:12px 16px 16px; }
+  }
+
   /* ---------- Crop modal ---------- */
   .crop-overlay{
     position:fixed; inset:0;
@@ -957,7 +1004,7 @@
   const chkTransparent = el('chkTransparent'), inputBgColor = el('inputBgColor');
   const formatPngBtn = el('formatPngBtn'), formatJpgBtn = el('formatJpgBtn'), formatPdfBtn = el('formatPdfBtn'), jpgNote = el('jpgNote'), pdfNote = el('pdfNote');
   const selectDpi = el('selectDpi'), finalSizeDisplay = el('finalSizeDisplay'), btnDownload = el('btnDownload'), btnReset = el('btnReset');
-  const frame = el('frame'), emptyState = el('emptyState');
+  const frame = el('frame'), emptyState = el('emptyState'), previewStage = el('previewStage');
   const rulerTop = el('rulerTop'), rulerLeft = el('rulerLeft');
   const btnRealSizeToggle = el('btnRealSizeToggle');
   const captionText = el('captionText');
@@ -1697,7 +1744,8 @@
     }
     emptyState.style.display = 'none';
 
-    const maxDim = 620;
+    const stageWidth = previewStage.clientWidth || 620;
+    const maxDim = window.innerWidth <= 600 ? Math.max(220, Math.min(620, stageWidth)) : 620;
     let pw, ph;
     if(full.w >= full.h){ pw = maxDim; ph = maxDim * (full.h/full.w); }
     else { ph = maxDim; pw = maxDim * (full.w/full.h); }
@@ -2241,6 +2289,12 @@
   loadSettings();
   syncUIFromState();
   render();
+
+  let resizeTimer = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 150);
+  });
 })();
 </script>
 </body>
