@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Coverstock — turn a drawing into a notebook-cover pattern</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -348,6 +348,16 @@
     cursor:pointer;
   }
   .preview-action-btn.active{color:var(--accent); border-color:var(--accent);}
+  .preview-collapse-btn{
+    display:none;
+    padding:6px;
+    width:28px; height:28px;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+  }
+  .preview-collapse-btn svg{transition:transform .2s ease;}
+  .main.collapsed .preview-collapse-btn svg{transform:rotate(-90deg);}
   .preview-stage{
     position:relative;
     padding:26px 0 0 30px;
@@ -408,59 +418,268 @@
   }
   .caption b{color:var(--text);}
 
+  /* ============================================================
+     TABLET + MOBILE REDESIGN
+     ============================================================
+     Philosophy: on small screens the preview is the product.
+     We give it a generous persistent strip at the top, then
+     surface controls in a card-drawer below — no hidden panels,
+     no back/forward navigation, just scroll. Signature element:
+     a frosted-glass preview bar that lifts off the page with a
+     glow, making the canvas feel like the thing you're building.
+     ============================================================ */
+
+  /* ---------- Tablet (881 – 1024px) ----------
+     Two-column layout is preserved but sidebar gets a tighter
+     width and the preview gains breathing room. */
+  @media (max-width: 1024px) and (min-width: 881px){
+    .app{ grid-template-columns: 300px 1fr; }
+    .sidebar{ padding: 22px 18px 36px; }
+    .main{ padding: 32px 28px; }
+  }
+
+  /* ---------- Stacked layout (<= 880px) ---------- */
   @media (max-width: 880px){
-    .app{grid-template-columns:1fr;}
-    .sidebar{max-height:none; border-right:none; border-bottom:1px solid var(--line);}
-    .main{padding:28px 16px;}
-    .preview-stage{padding-left:24px;}
+    /* ---- App shell ---- */
+    .app{
+      display: flex;
+      flex-direction: column;
+      /* Reserve space at the bottom for the fixed tab bar */
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    }
+
+    /* ---- Preview bar — pinned at top, always visible ---- */
+    .main{
+      order: -1;
+      position: sticky;
+      top: 0;
+      z-index: 30;
+      /* Frosted-glass look on top of the grid background */
+      background: rgba(33, 52, 44, 0.92);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--line);
+      box-shadow:
+        0 1px 0 rgba(255,255,255,0.04) inset,
+        0 12px 32px rgba(0,0,0,0.45),
+        0 0 0 1px rgba(232,118,44,0.08);
+      padding: calc(12px + env(safe-area-inset-top)) 16px 10px;
+      gap: 6px;
+      max-height: 52vh;
+      overflow: hidden;
+      transition: max-height .25s cubic-bezier(.4,0,.2,1),
+                  padding-bottom .25s cubic-bezier(.4,0,.2,1),
+                  box-shadow .2s ease;
+    }
+    .main.collapsed{
+      max-height: 50px;
+      padding-bottom: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .main.collapsed .preview-stage,
+    .main.collapsed .caption{ opacity: 0; pointer-events: none; }
+
+    /* Collapse button always visible on mobile */
+    .preview-collapse-btn{
+      display: flex;
+      background: rgba(255,255,255,0.07);
+      border-radius: 6px;
+      border: 1px solid var(--line);
+    }
+    .preview-collapse-btn svg{ transition: transform .25s cubic-bezier(.4,0,.2,1); }
+    .main.collapsed .preview-collapse-btn svg{ transform: rotate(-90deg); }
+
+    /* Top row of the preview */
+    .main-top{
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: nowrap;
+      gap: 8px;
+    }
+    .main-top h2{
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      margin: 0;
+      font-weight: 500;
+    }
+    .main-top > div{
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .preview-action-btn{
+      font-size: 11px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    /* Canvas stage */
+    .preview-stage{
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1 1 auto;
+      min-height: 0;
+      transition: opacity .2s ease;
+    }
+    .frame{ max-width: 100%; }
+    .frame canvas{
+      max-width: 100%;
+      max-height: 42vh;
+      width: auto;
+      height: auto;
+      display: block;
+    }
+    .caption{
+      transition: opacity .2s ease;
+      font-size: 10px;
+      padding: 0 8px;
+    }
+
+    /* Empty state: full-width, shorter */
+    .empty-state{
+      width: 100%;
+      max-width: 360px;
+      height: 130px;
+      border-style: dashed;
+    }
+    .empty-state p{ font-size: 12px; max-width: 220px; }
+
+    /* ---- Sidebar — becomes the scrollable settings panel below preview ---- */
+    .sidebar{
+      border-right: none;
+      max-height: none;
+      /* Pill-card treatment: each section feels like a discrete card */
+      background: transparent;
+      padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    /* Brand: subtle header above the first card */
+    .brand{
+      padding: 4px 2px 2px;
+      margin-bottom: 0;
+    }
+    .brand h1{ font-size: 16px; }
+    .brand-sub{ margin: 0 0 0 22px; font-size: 11px; color: var(--text-faint); }
+
+    /* Each section becomes a raised card */
+    .section{
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 16px 18px;
+      margin-bottom: 0;
+      /* Override default bottom border used as divider */
+      border-bottom-color: var(--line) !important;
+    }
+    .section:last-of-type{ border-bottom-color: var(--line) !important; }
+
+    /* Eyebrow inside each card */
+    .section-eyebrow{
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+
+    /* Fields: slightly more breathing room */
+    .field{ margin-bottom: 14px; }
+    .field:last-child{ margin-bottom: 0; }
+    label.field-label{ font-size: 13px; margin-bottom: 8px; }
+    .help{ font-size: 11px; line-height: 1.45; margin-top: 5px; }
+
+    /* Dropzone: shorter on mobile */
+    .dropzone{ padding: 18px 14px; }
+    .dropzone p{ font-size: 12px; }
+    .dropzone svg{ width: 24px; height: 24px; margin-bottom: 6px; }
+
+    /* Thumb chips: roomy for fat fingers */
+    .chip, .add-chip{ width: 54px; height: 54px; }
+    .chip img{ width: 54px; height: 54px; }
+    .thumb-grid{ gap: 10px; }
+
+    /* Segment controls: bigger tap targets */
+    .seg button{ padding: 10px 0; font-size: 13px; }
+
+    /* Sliders */
+    input[type=range]{ height: 6px; }
+    input[type=range]::-webkit-slider-thumb{ width: 22px; height: 22px; }
+    input[type=range]::-moz-range-thumb{ width: 20px; height: 20px; }
+
+    /* Checkboxes */
+    .checkrow{ padding: 3px 0; gap: 10px; }
+    .checkrow input[type=checkbox]{ width: 18px; height: 18px; }
+
+    /* Text inputs / selects */
+    input[type=number], select, input[type=text]{
+      font-size: 16px; /* prevent iOS zoom */
+      padding: 10px 12px;
+      border-radius: 8px;
+    }
+
+    /* Buttons */
+    .btn{ padding: 13px 14px; font-size: 14px; border-radius: 9px; }
+    .btn-primary{ padding: 15px 14px; font-size: 15px; letter-spacing: 0.01em; }
+
+    /* Color swatch */
+    input[type=color]{ width: 42px; height: 42px; border-radius: 10px; }
   }
 
-  /* ---------- Mobile ---------- */
-  @media (max-width: 600px){
-    body{ font-size:15px; }
-    .sidebar{ padding:18px 16px 24px; }
-    .brand h1{ font-size:18px; }
-    .brand-sub{ margin:0 0 22px 24px; font-size:11.5px; }
-    .section{ margin-bottom:20px; padding-bottom:20px; }
-
-    /* Tappable controls need more room on touch screens */
-    input[type=range]{ height:6px; }
-    input[type=range]::-webkit-slider-thumb{ width:20px; height:20px; }
-    input[type=range]::-moz-range-thumb{ width:18px; height:18px; }
-    input[type=number], select, input[type=text]{ font-size:16px; padding:10px 10px; } /* 16px prevents iOS auto-zoom */
-    .seg button{ padding:10px 0; font-size:13px; }
-    .checkrow input[type=checkbox]{ width:18px; height:18px; }
-    .btn{ padding:12px 14px; font-size:14px; }
-    .btn-primary{ padding:15px 14px; font-size:15px; }
-    input[type=color]{ width:40px; height:40px; }
-    .chip, .chip img, .add-chip{ width:46px; height:46px; }
-
-    /* Main / preview area */
-    .main{ padding:18px 12px 32px; gap:14px; }
-    .main-top{ flex-wrap:wrap; gap:8px; }
-    .main-top h2{ font-size:13px; }
-    .preview-action-btn{ font-size:11.5px; padding:7px 10px; }
-
-    /* Rulers don't track a scaled-down canvas correctly, so hide them on
-       small screens and let the frame use the full available width. */
-    .ruler{ display:none; }
-    .preview-stage{ padding:0; width:100%; max-width:100%; }
-    .frame{ max-width:100%; }
-    .frame canvas{ max-width:100%; height:auto; }
-    .empty-state{ width:100%; max-width:420px; height:300px; }
-    .empty-state p{ max-width:200px; font-size:12.5px; }
-    .caption{ font-size:11px; padding:0 8px; }
-
-    /* Crop modal */
-    .crop-overlay{ padding:0; align-items:flex-end; }
-    .crop-modal{ max-width:100%; max-height:96vh; border-radius:14px 14px 0 0; }
-    .crop-head{ padding:14px 16px 12px; }
-    .crop-head h3{ font-size:14px; }
-    .crop-stage{ flex:0 0 auto; height:min(380px, 42vh); }
-    .crop-controls{ padding:12px 16px; gap:10px; }
-    .crop-row label{ width:54px; font-size:11.5px; }
-    .crop-actions{ padding:12px 16px 16px; }
+  /* ---- Cropping modal on mobile: full-screen sheet ---- */
+  @media (max-width: 880px){
+    .crop-overlay{ padding: 0; align-items: flex-end; }
+    .crop-modal{
+      max-width: 100%;
+      max-height: 95vh;
+      border-radius: 20px 20px 0 0;
+      /* Drag handle hint */
+      border-top: 4px solid var(--line);
+    }
+    .crop-head{ padding: 16px 18px 13px; }
+    .crop-head h3{ font-size: 15px; }
+    .crop-stage{
+      flex: 0 0 auto;
+      height: min(360px, 40vh);
+    }
+    .crop-controls{ padding: 12px 18px; gap: 12px; }
+    .crop-row label{ width: 54px; font-size: 11.5px; }
+    .crop-actions{ padding: 12px 18px calc(18px + env(safe-area-inset-bottom)); }
+    .crop-actions .btn{ padding: 14px; font-size: 14px; border-radius: 10px; }
   }
+
+  /* ---------- Touch-friendly tap targets (coarse pointer = touch screen) ----------
+     These base touch sizes apply for all coarse-pointer devices including large
+     tablets in landscape. The breakpoint blocks above then fine-tune spacing. */
+  @media (pointer: coarse){
+    .chip-edit{
+      opacity: 1;
+      background: rgba(8,12,10,0.32);
+      font-size: 17px;
+    }
+    .crop-handle{ width: 22px; height: 22px; }
+    .crop-handle.nw{ top:-11px; left:-11px; }
+    .crop-handle.ne{ top:-11px; right:-11px; }
+    .crop-handle.sw{ bottom:-11px; left:-11px; }
+    .crop-handle.se{ bottom:-11px; right:-11px; }
+    .crop-handle.n{ top:-11px; margin-left:-11px; }
+    .crop-handle.s{ bottom:-11px; margin-left:-11px; }
+    .crop-handle.w{ left:-11px; margin-top:-11px; }
+    .crop-handle.e{ right:-11px; margin-top:-11px; }
+    .chip-remove{ width:24px; height:24px; top:-9px; right:-9px; font-size:15px; }
+  }
+
 
   /* ---------- Crop modal ---------- */
   .crop-overlay{
@@ -603,6 +822,58 @@
     padding:16px 22px 20px;
   }
   .crop-actions .btn{flex:1;}
+
+  /* ---------- Layout helpers (formerly inline styles) ---------- */
+  .mt-sm{margin-top:10px;}
+  .mt-md{margin-top:14px;}
+  .mt-lg{margin-top:16px;}
+  .mb-md{margin-bottom:14px;}
+  .flex-1{flex:1;}
+  .inline-row{display:flex; align-items:center; gap:8px;}
+  .field-narrow{max-width:84px;}
+  .field-label-inline{flex:1; margin-bottom:0;}
+
+  /* Cutout sub-panel inside the crop modal */
+  .cutout-panel{
+    border-top:1px solid var(--line);
+    margin:4px -22px 0;
+    padding:12px 22px 0;
+  }
+  .cutout-toggle{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    width:auto;
+    flex-shrink:0;
+    cursor:pointer;
+  }
+  .cutout-toggle input[type=checkbox]{
+    width:15px;height:15px;
+    accent-color:var(--accent);
+    cursor:pointer;
+    flex-shrink:0;
+    margin:0;
+  }
+  .cutout-toggle .ctext{font-size:12px; color:var(--text-dim);}
+  .cutout-slider{flex:1;}
+  .cutout-slider.disabled{opacity:0.35; pointer-events:none;}
+  .cutout-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px;
+    color:var(--text-dim);
+    width:28px;
+    text-align:right;
+    flex-shrink:0;
+  }
+  .cutout-hint-row{margin-top:2px;}
+  .cutout-hint{font-size:11px; color:var(--text-faint);}
+  .cutout-reset{font-size:11px; margin-left:auto;}
+  .cutout-note{
+    font-size:11px;
+    color:var(--text-faint);
+    margin:4px 0 0;
+    line-height:1.4;
+  }
 
 </style>
 </head>
@@ -898,15 +1169,21 @@
       </div>
       <p class="help" id="finalSizeDisplay" style="margin-bottom:14px;">2362 × 2480 px · 14.8 × 21 cm · 300 dpi</p>
       <button class="btn btn-primary" id="btnDownload" disabled>Download cover</button>
+      <p class="help" id="mobileShareHint" style="display:none; margin-top:8px;">On phones/tablets this opens your share sheet — choose "Save Image" to send it straight to Photos.</p>
       <button class="link-btn" id="btnReset" style="margin-top:14px;">Reset all settings</button>
     </div>
   </div>
 
   <!-- ============ MAIN ============ -->
-  <div class="main">
+  <div class="main" id="mainPanel">
     <div class="main-top">
       <h2>preview</h2>
-      <button class="preview-action-btn" id="btnRealSizeToggle" type="button">Preview 100% Real Size</button>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <button class="preview-action-btn" id="btnRealSizeToggle" type="button">Preview 100% Real Size</button>
+        <button class="preview-action-btn preview-collapse-btn" id="btnTogglePreview" type="button" aria-expanded="true" aria-controls="previewStage" title="Collapse preview">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+      </div>
     </div>
 
     <div class="preview-stage" id="previewStage">
@@ -967,6 +1244,11 @@
     format: 'png'
   };
 
+  // Guards against the "Real-size preview" and "Download" actions running their
+  // (expensive, full-resolution) canvas renders at the same time, which could
+  // double up memory use on a phone.
+  let isHeavyRenderInProgress = false;
+
   const PRESETS = {
     a5: {w:14.8, h:21},
     a4: {w:21, h:29.7},
@@ -1005,6 +1287,7 @@
   const formatPngBtn = el('formatPngBtn'), formatJpgBtn = el('formatJpgBtn'), formatPdfBtn = el('formatPdfBtn'), jpgNote = el('jpgNote'), pdfNote = el('pdfNote');
   const selectDpi = el('selectDpi'), finalSizeDisplay = el('finalSizeDisplay'), btnDownload = el('btnDownload'), btnReset = el('btnReset');
   const frame = el('frame'), emptyState = el('emptyState'), previewStage = el('previewStage');
+  const mainPanel = el('mainPanel'), btnTogglePreview = el('btnTogglePreview');
   const rulerTop = el('rulerTop'), rulerLeft = el('rulerLeft');
   const btnRealSizeToggle = el('btnRealSizeToggle');
   const captionText = el('captionText');
@@ -1030,6 +1313,15 @@
   function getFullDimsCm(){
     const trim = getCoverDimsCm(), b = getBleedCm();
     return { w: trim.w + 2*b, h: trim.h + 2*b };
+  }
+  // Columns alone ("7 across") doesn't tell you how big a motif actually
+  // prints — the same column count looks tiny on a big cover and huge on a
+  // small one. Showing the real cell size makes the Density slider legible.
+  function updateColumnsLabel(){
+    const full = getFullDimsCm();
+    const cellCm = full.w / state.columns;
+    const unitLabel = state.unit === 'in' ? (cellCm/2.54).toFixed(2) + ' in' : cellCm.toFixed(1) + ' cm';
+    columnsVal.textContent = state.columns + ' across · ~' + unitLabel + ' each';
   }
 
   // ---------------- Image handling ----------------
@@ -1562,18 +1854,43 @@
         return lastIdx;
       }
 
+      // Stratified sampler for scatter/rotation/size variance: plain independent
+      // randomness occasionally clumps by chance (e.g. several small motifs landing
+      // in the same row, making half the cover look thin). Splitting the -1..1
+      // range into evenly spaced slots, jittering within each, then shuffling the
+      // order guarantees the full range shows up within every `bucketCount`-sized
+      // window, while each individual value still looks random.
+      function makeStratifiedStream(bucketCount){
+        let bag = [];
+        return function next(){
+          if(bag.length === 0){
+            bag = Array.from({length: bucketCount}, (_, i) => ((i + rng()) / bucketCount) * 2 - 1);
+            for(let i = bag.length - 1; i > 0; i--){
+              const j = Math.floor(rng() * (i + 1));
+              [bag[i], bag[j]] = [bag[j], bag[i]];
+            }
+          }
+          return bag.pop();
+        };
+      }
+      const bucketCount = Math.max(8, colsCount);
+      const jxStream = makeStratifiedStream(bucketCount);
+      const jyStream = makeStratifiedStream(bucketCount);
+      const rotStream = makeStratifiedStream(bucketCount);
+      const scaleStream = makeStratifiedStream(bucketCount);
+
       for(let r = -1; r < rowsCount; r++){
         for(let c = -1; c < colsCount; c++){
           let cx = c*spacing + spacing/2;
           let cy = r*spacing + spacing/2;
           if(opts.layout === 'brick' && Math.abs(r % 2) === 1){ cx += spacing/2; }
 
-          const jx = (rng()-0.5) * 2 * opts.scatter * spacing;
-          const jy = (rng()-0.5) * 2 * opts.scatter * spacing;
+          const jx = jxStream() * opts.scatter * spacing;
+          const jy = jyStream() * opts.scatter * spacing;
           const px = cx + jx, py = cy + jy;
 
-          const rot = opts.rotationBase + (rng()-0.5) * 2 * opts.rotationVar;
-          const scaleVar = 1 + (rng()-0.5) * 2 * opts.sizeVar;
+          const rot = opts.rotationBase + rotStream() * opts.rotationVar;
+          const scaleVar = 1 + scaleStream() * opts.sizeVar;
           const srcIdx = pickSrc();
           const src = opts.sources[srcIdx];
           const drawW = Math.max(2, spacing * opts.motifScale * scaleVar);
@@ -1731,6 +2048,7 @@
 
   function doRender(){
     const full = getFullDimsCm();
+    updateColumnsLabel();
 
     if(state.images.length === 0){
       emptyState.style.display = 'flex';
@@ -1744,11 +2062,12 @@
     }
     emptyState.style.display = 'none';
 
-    const stageWidth = previewStage.clientWidth || 620;
-    const maxDim = window.innerWidth <= 600 ? Math.max(220, Math.min(620, stageWidth)) : 620;
-    let pw, ph;
-    if(full.w >= full.h){ pw = maxDim; ph = maxDim * (full.h/full.w); }
-    else { ph = maxDim; pw = maxDim * (full.w/full.h); }
+    const isStackedLayout = window.innerWidth <= 880;
+    const availW = isStackedLayout ? Math.max(120, previewStage.clientWidth || 300) : 620;
+    const availH = isStackedLayout ? Math.max(100, previewStage.clientHeight || 220) : 620;
+    const aspect = full.w / full.h;
+    let pw = availW, ph = pw / aspect;
+    if(ph > availH){ ph = availH; pw = ph * aspect; }
     const pxScale = 2;
 
     let canvas = frame.querySelector('canvas');
@@ -1891,7 +2210,7 @@
     layoutBrickBtn.setAttribute('aria-pressed', state.layout==='brick');
 
     sliderColumns.value = state.columns;
-    columnsVal.textContent = state.columns + ' across';
+    updateColumnsLabel();
     sliderMotifScale.value = state.motifScalePct;
     motifScaleVal.textContent = state.motifScalePct + '%';
     sliderScatter.value = state.scatterPct;
@@ -1968,7 +2287,7 @@
 
   sliderColumns.addEventListener('input', () => {
     state.columns = +sliderColumns.value;
-    columnsVal.textContent = state.columns + ' across';
+    updateColumnsLabel();
     render();
   });
   sliderMotifScale.addEventListener('input', () => {
@@ -2145,8 +2464,17 @@
   // Real-size preview — renders the cover at its actual export resolution (same pixel
   // dimensions as a download) and opens it in a new tab, where browsers show images at
   // their native 100% size by default — exactly like opening the exported file.
+  // Mobile: lets people shrink the pinned preview down to a thin bar when
+  // they need more room to work through settings, then bring it back.
+  btnTogglePreview.addEventListener('click', () => {
+    const collapsed = mainPanel.classList.toggle('collapsed');
+    btnTogglePreview.setAttribute('aria-expanded', String(!collapsed));
+    btnTogglePreview.title = collapsed ? 'Expand preview' : 'Collapse preview';
+  });
+
   btnRealSizeToggle.addEventListener('click', () => {
     if(state.images.length === 0) return;
+    if(isHeavyRenderInProgress) return;
     const dpi = state.dpi;
     const full = getFullDimsCm();
     const fullPxW = Math.round(full.w/2.54*dpi);
@@ -2162,6 +2490,7 @@
     )) return;
 
     const prevText = btnRealSizeToggle.textContent;
+    isHeavyRenderInProgress = true;
     btnRealSizeToggle.disabled = true;
     btnRealSizeToggle.textContent = 'Rendering…';
     setTimeout(() => {
@@ -2176,6 +2505,7 @@
         generatePattern(rctx, fullPxW, fullPxH, opts);
 
         renderCanvas.toBlob(blob => {
+          isHeavyRenderInProgress = false;
           btnRealSizeToggle.disabled = false;
           btnRealSizeToggle.textContent = prevText;
           if(!blob){ alert('Could not render the full-size preview.'); return; }
@@ -2186,6 +2516,7 @@
           }
         }, 'image/png');
       } catch(err){
+        isHeavyRenderInProgress = false;
         btnRealSizeToggle.disabled = false;
         btnRealSizeToggle.textContent = prevText;
         alert('Could not render the full-size preview.');
@@ -2200,13 +2531,48 @@
     location.reload();
   });
 
+  // ---------------- Mobile share-to-gallery ----------------
+  // On phones/tablets there's no "Downloads" folder users naturally check for
+  // images — the expected place is the Photos/Gallery app. The Web Share API
+  // (sharing a File) lets the OS show its native sheet, which on iOS includes
+  // "Save Image" (straight to Photos) and on Android includes "Save to
+  // [Gallery/Files]" depending on installed apps. Desktop browsers either lack
+  // navigator.share or lack file support, so they transparently fall back to
+  // the normal <a download> link.
+  function isMobileOrTablet(){
+    const ua = navigator.userAgent || '';
+    if(/Mobi|Android|iPhone|iPad|iPod/i.test(ua)) return true;
+    // iPadOS 13+ identifies as "Mac" in the UA string but is touch-driven.
+    if(/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) return true;
+    return false;
+  }
+  // Resolves true if the file was handed off to the native share sheet
+  // (including if the person cancelled it), false if the caller should fall
+  // back to a normal download link.
+  async function shareFileIfMobile(blob, filename, mime){
+    if(!isMobileOrTablet() || !navigator.share || !navigator.canShare) return false;
+    try{
+      const file = new File([blob], filename, { type: mime });
+      if(!navigator.canShare({ files: [file] })) return false;
+      await navigator.share({ files: [file], title: filename });
+      return true;
+    }catch(err){
+      // AbortError = person dismissed the share sheet — respect that and
+      // don't dump a second, unrequested download on top of it.
+      if(err && err.name === 'AbortError') return true;
+      return false;
+    }
+  }
+
   // Download
   btnDownload.addEventListener('click', () => {
     if(state.images.length === 0) return;
+    if(isHeavyRenderInProgress) return;
     if(state.format === 'pdf' && (!window.jspdf || !window.jspdf.jsPDF)){
       alert('The PDF library couldn\'t load (often caused by being offline or an ad-blocker). Try PNG/JPG instead, or reload the page with a working connection.');
       return;
     }
+    isHeavyRenderInProgress = true;
     btnDownload.disabled = true;
     const prevText = btnDownload.textContent;
     btnDownload.textContent = 'Rendering…';
@@ -2251,6 +2617,7 @@
       }
 
       function finish(){
+        isHeavyRenderInProgress = false;
         btnDownload.disabled = false;
         btnDownload.textContent = prevText;
       }
@@ -2265,8 +2632,11 @@
         });
         const dataUrl = outCanvas.toDataURL('image/png');
         pdf.addImage(dataUrl, 'PNG', 0, 0, wMm, hMm);
-        pdf.save('coverstock-pattern.pdf');
-        finish();
+        const pdfBlob = pdf.output('blob');
+        shareFileIfMobile(pdfBlob, 'coverstock-pattern.pdf', 'application/pdf').then(shared => {
+          if(!shared) pdf.save('coverstock-pattern.pdf');
+          finish();
+        });
         return;
       }
 
@@ -2274,13 +2644,18 @@
       const ext = isJpg ? 'jpg' : 'png';
       const quality = isJpg ? 0.92 : undefined;
       outCanvas.toBlob(blob => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'coverstock-pattern.' + ext;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        finish();
+        const filename = 'coverstock-pattern.' + ext;
+        shareFileIfMobile(blob, filename, mime).then(shared => {
+          if(!shared){
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+          }
+          finish();
+        });
       }, mime, quality);
     }, 30);
   });
@@ -2289,6 +2664,9 @@
   loadSettings();
   syncUIFromState();
   render();
+  if(isMobileOrTablet() && navigator.share && navigator.canShare){
+    el('mobileShareHint').style.display = 'block';
+  }
 
   let resizeTimer = null;
   window.addEventListener('resize', () => {
