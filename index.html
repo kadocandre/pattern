@@ -885,6 +885,85 @@
     line-height:1.4;
   }
 
+  /* ---------- Footer ---------- */
+  footer{
+    position:relative;
+    background:var(--panel);
+    border-top:1px solid var(--line);
+    padding:1.5rem 2rem;
+    display:grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items:center;
+    gap:1.5rem;
+  }
+  .footer-label{
+    display:flex;
+    align-items:center;
+    gap:0.5rem;
+    font-size:0.63rem;
+    letter-spacing:0.10em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+  }
+  .footer-label::before{
+    content:'';
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:var(--accent);
+    flex-shrink:0;
+  }
+  .footer-socials{
+    display:flex;
+    align-items:center;
+    gap:0.4rem;
+    justify-self:end;
+  }
+  .social-link{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:34px;
+    height:34px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--well);
+    color:var(--text-dim);
+    text-decoration:none;
+    transition:color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s;
+  }
+  .social-link svg{
+    width:15px;
+    height:15px;
+    fill:currentColor;
+    flex-shrink:0;
+  }
+  .social-link:hover{
+    color:var(--accent);
+    border-color:var(--accent);
+    background:var(--accent-dim);
+    transform:translateY(-2px);
+  }
+  .footer-copy{
+    font-size:0.63rem;
+    letter-spacing:0.06em;
+    color:var(--text-dim);
+    white-space:nowrap;
+    text-align:center;
+  }
+  .footer-copy span{
+    color:var(--accent);
+  }
+  @media (max-width: 560px){
+    footer{
+      grid-template-columns: 1fr;
+      gap:1rem;
+      padding:1.25rem;
+    }
+    .footer-copy{text-align:left;}
+    .footer-socials{justify-self:start;}
+  }
+
 </style>
 </head>
 <body>
@@ -1210,7 +1289,60 @@
   </div>
 </div>
 
+<footer>
 
+  <!-- Left: label -->
+  <div class="footer-label">André Sousa</div>
+
+  <!-- Centre: copyright -->
+  <p class="footer-copy">© Created by <span>André Sousa</span> 2026</p>
+
+  <!-- Right: social icons -->
+  <nav class="footer-socials" aria-label="Social links">
+
+    <!-- Instagram -->
+    <a class="social-link" href="https://www.instagram.com/thisisandresousa/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+      <svg viewBox="0 0 22.47 22.47" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M17.18,4.01c-.73,0-1.32.59-1.32,1.32s.59,1.32,1.32,1.32,1.32-.59,1.32-1.32-.59-1.32-1.32-1.32Z"/>
+        <path d="M11.33,5.7c-3.05,0-5.53,2.48-5.53,5.53s2.48,5.53,5.53,5.53,5.53-2.48,5.53-5.53-2.48-5.53-5.53-5.53ZM11.33,14.78c-1.95,0-3.54-1.59-3.54-3.54s1.59-3.54,3.54-3.54,3.54,1.59,3.54,3.54-1.59,3.54-3.54,3.54Z"/>
+        <path d="M15.72,22.47H6.75c-3.72,0-6.75-3.03-6.75-6.75V6.75C0,3.03,3.03,0,6.75,0h8.97c3.72,0,6.75,3.03,6.75,6.75v8.97c0,3.72-3.03,6.75-6.75,6.75ZM6.75,2.11c-2.56,0-4.64,2.08-4.64,4.64v8.97c0,2.56,2.08,4.64,4.64,4.64h8.97c2.56,0,4.64-2.08,4.64-4.64V6.75c0-2.56-2.08-4.64-4.64-4.64H6.75Z"/>
+      </svg>
+    </a>
+
+    <!-- LinkedIn -->
+    <a class="social-link" href="https://www.linkedin.com/in/andresousaz/" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+      <svg viewBox="0 0 21.84 21.79" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M.36,7.23h4.53v14.56H.36V7.23ZM2.63,0c1.45,0,2.62,1.18,2.62,2.62s-1.17,2.63-2.62,2.63S0,4.07,0,2.62,1.17,0,2.63,0"/>
+        <path d="M7.73,7.23h4.34v1.99h.06c.61-1.15,2.08-2.35,4.28-2.35,4.58,0,5.43,3.01,5.43,6.93v7.98h-4.52v-7.08c0-1.69-.03-3.86-2.35-3.86s-2.71,1.84-2.71,3.74v7.2h-4.52V7.23Z"/>
+      </svg>
+    </a>
+
+    <!-- Behance -->
+    <a class="social-link" href="https://www.behance.net/andresousaz" target="_blank" rel="noopener noreferrer" aria-label="Behance">
+      <svg viewBox="0 0 31.2 19.5" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M15.71,14.47c0,.82-.16,1.55-.49,2.17-.33.62-.78,1.14-1.36,1.57-.58.42-1.25.74-2,.96-.76.22-1.57.33-2.43.33H0V0h10.43c.68,0,1.29.15,1.84.44.55.29,1.02.67,1.4,1.14.38.47.68,1,.89,1.59.21.6.32,1.19.32,1.8,0,.95-.24,1.84-.71,2.68-.48.83-1.17,1.45-2.09,1.85,1.12.33,2,.92,2.65,1.77.65.85.97,1.92.97,3.2ZM3.79,3.24v4.92h5.05c.64,0,1.19-.22,1.63-.66.45-.44.67-1.04.67-1.81s-.21-1.35-.62-1.78c-.41-.44-.92-.66-1.52-.66H3.79ZM11.89,13.76c0-.35-.06-.68-.18-1-.12-.32-.28-.6-.48-.84-.2-.24-.44-.43-.71-.56-.27-.14-.58-.21-.91-.21H3.79v5.13h5.63c.35,0,.67-.06.97-.19.3-.13.56-.31.78-.54.22-.23.39-.5.52-.81.13-.31.19-.64.19-.99Z"/>
+        <path d="M23.91,19.5c-1.12,0-2.13-.19-3.03-.57-1.79-.76-3.06-2.04-3.79-3.84-.35-.87-.52-1.78-.52-2.74s.17-1.93.51-2.81c.72-1.82,1.99-3.12,3.79-3.9.91-.39,1.94-.59,3.07-.59s2.15.2,3.05.59c2.94,1.28,4.33,4.14,4.2,7.24,0,.21-.03.39-.07.53h-10.78c.05.55.19,1.04.4,1.46.21.43.49.79.82,1.09.34.3.72.53,1.14.69.43.16.87.24,1.33.24.71,0,1.38-.17,2.01-.52.63-.35,1.06-.8,1.29-1.37l3.06.85c-.51,1.06-1.33,1.94-2.46,2.62-1.13.68-2.47,1.02-4.03,1.02ZM27.53,11.09c-.09-1.05-.47-1.88-1.16-2.51-.68-.63-1.51-.94-2.49-.94-.48,0-.93.08-1.34.25-.42.17-.78.4-1.1.7-.32.3-.58.67-.78,1.09-.2.43-.32.9-.36,1.41h7.24Z"/>
+        <path d="M19.22.93h9.33v2.31h-9.33V.93Z"/>
+      </svg>
+    </a>
+
+    <!-- Pinterest -->
+    <a class="social-link" href="https://www.pinterest.com/andresousaz/" target="_blank" rel="noopener noreferrer" aria-label="Pinterest">
+      <svg viewBox="0 0 23.86 23.9" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M12.93,0s.08.07.13.05c.19-.05.31.02.49.05,3.59.47,6.77,2.58,8.64,5.67.97,1.6,1.53,3.35,1.68,5.22v1.92c-.48,5.85-5.1,10.48-10.96,10.96-1.54.13-2.92-.06-4.36-.47.49-.79.94-1.54,1.17-2.43l.89-3.41c.58,1.02,1.87,1.52,3.06,1.5,2.7-.06,4.68-1.88,5.62-4.33.46-1.19.65-2.4.67-3.68.08-3.68-2.81-6.48-6.35-6.94-1.51-.2-3-.04-4.43.42-1.61.52-2.93,1.5-3.93,2.85-1.4,1.89-1.79,4.35-.95,6.55.37.98,1.05,1.76,2.03,2.14.12.05.24.05.34,0,.09-.04.16-.15.19-.27l.27-1c.06-.21,0-.45-.13-.62-.57-.67-.82-1.48-.83-2.37,0-1.43.47-2.76,1.41-3.83.81-.92,1.85-1.55,3.06-1.78,1.05-.2,2.11-.19,3.14.07,1.78.46,3.05,1.93,3.21,3.78.17,2.02-.31,4.46-1.68,5.99-1.02,1.13-2.8,1.35-3.67.21-.39-.51-.44-1.11-.26-1.72l.85-2.97c.27-.93.27-2.12-.54-2.64-.67-.44-1.57-.3-2.16.22-1.22,1.08-1.28,3.09-.66,4.52l-1.56,6.61c-.21.88-.2,1.74-.18,2.63C3.4,21.26.61,17.64.1,13.54c-.03-.2-.09-.36-.05-.57,0-.02-.04-.05-.05-.04v-1.96s.08-.53.08-.53c.26-1.78.85-3.46,1.82-4.97C3.93,2.33,7.29.33,10.98.02l1.95-.02Z"/>
+      </svg>
+    </a>
+
+    <!-- TikTok -->
+    <a class="social-link" href="https://www.tiktok.com/@thisisandresousa" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+      <svg viewBox="0 0 20.11 23.51" xmlns="http://www.w3.org/2000/svg" fill="currentColor">
+        <path d="M20.11,9.51h0c-.19.02-.38.03-.58.03-2.12,0-4.09-1.07-5.25-2.84v9.66c0,3.94-3.2,7.14-7.14,7.14S0,20.31,0,16.36s3.2-7.14,7.14-7.14c.15,0,.29.01.44.02v3.52c-.15-.02-.29-.04-.44-.04-2.01,0-3.64,1.63-3.64,3.64s1.63,3.64,3.64,3.64,3.79-1.59,3.79-3.6l.04-16.41h3.37c.32,3.02,2.75,5.38,5.78,5.6v3.91Z"/>
+      </svg>
+    </a>
+
+  </nav>
+
+</footer>
 
 <script>
 (function(){
